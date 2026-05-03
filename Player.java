@@ -42,13 +42,16 @@ public class Player extends Entity{
     public void draw(Graphics2D g2D){
         g2D.setColor(new Color(255));
         g2D.drawImage(Utils.black_king, pos[0] - size/2 - GamePanel.offset[0], pos[1] - size/2 - GamePanel.offset[1], null);
-        draw_gui(g2D);
+        draw_hud(g2D);
     }
-    public void draw_gui(Graphics2D g2D){
+    
+    public void draw_hud(Graphics2D g2D){
         for (int i = 1; i <= stamina; i ++){
             g2D.setColor(new Color(0, 255, 255));
-            g2D.fillRect(100 * i, 70, (int)(75*(this.stamina/10)), 30);
+            g2D.fillRect(100 * i, 70, 75, 30);
         }
+        g2D.setColor(new Color(0, 255, 255));
+        g2D.fillRect(100 + 100 * (int)stamina, 70, (int)(75*(stamina%1.0)), 30);
         for (int i = 1; i <= 3; i ++){
             g2D.setColor(new Color(0));
             g2D.drawRect(100 * i, 70, 75, 30);

@@ -8,10 +8,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 public class Utils {
@@ -31,32 +34,40 @@ public class Utils {
     public Utils(){
         new_font = null;
     }
-    // private static BufferedImage[][] loadPlayer(String filename, int row, int col){
-    //     int height = 14;
-    //     int width = 13;
+    
+    private static BufferedImage loadsheet(String filename){// method for loading sprite sheet
+        try {
+            return ImageIO.read(new File(filename)); // Load sprite sheet from file
+        } catch (IOException e) {
+            return null;
+        }
+    }
+    private static BufferedImage[][] loadPlayer(String filename, int row, int col){
+        int height = 14;
+        int width = 13;
 
-    //     BufferedImage sprites = loadsheet(filename);
-    //     BufferedImage[][] walkFrames = new BufferedImage[row][col];
+        BufferedImage sprites = loadsheet(filename);
+        BufferedImage[][] walkFrames = new BufferedImage[row][col];
 
-    //     for (int r = 0; r < row; r++) {
-    //         for (int c = 0; c < col; c++) {
-    //             int x = r*(width+1); // x position of the frame
-    //             int y = c*(height+2); // y position of the frame
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                int x = r*(width+1); // x position of the frame
+                int y = c*(height+2); // y position of the frame
 
-    //             int newWidth = (int)(width*2);
-    //             int newHeight = (int)(height*2);
-    //             BufferedImage ogFrame = sprites.getSubimage(x, y, width, height);
-    //             BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+                int newWidth = (int)(width*2);
+                int newHeight = (int)(height*2);
+                BufferedImage ogFrame = sprites.getSubimage(x, y, width, height);
+                BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
 
-    //             Graphics2D g2d = resized.createGraphics();
-    //             g2d.drawImage(ogFrame.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH), 0, 0, null);
-    //             g2d.dispose();
+                Graphics2D g2d = resized.createGraphics();
+                g2d.drawImage(ogFrame.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH), 0, 0, null);
+                g2d.dispose();
                 
-    //             walkFrames[r][c] = resized;
-    //         }
-    //     }
-    //     return walkFrames;
-    // }
+                walkFrames[r][c] = resized;
+            }
+        }
+        return walkFrames;
+    }
 
     public static Tile tile_at(int x, int y){
         for (Tile[] row : GamePanel.current_moon.tilemap){
