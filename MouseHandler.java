@@ -14,6 +14,8 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
     public int[] pos;// array for the position of the mouse
     public boolean pressed, left_click, right_click, scroll;// bools for the mouse states
     public boolean previous;// previous mouse press bool (last frame)
+    public int[] pressed_position;
+    public int[] released_position;
 
     public int scroll_direction; // -1 for up, 1 for down
     public final int UP = -1, DOWN = 1;
@@ -21,6 +23,7 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
 
     public MouseHandler(){
         this.pos = new int[]{0, 0};
+        this.pressed_position = new int[]{0, 0};
 
         this.pressed = false;
         this.left_click = false;
@@ -29,6 +32,7 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
 
         this.scroll_direction = 0; // neutral at start
         this.scroll_amount = 0;
+
     }
 
     @Override
@@ -53,6 +57,10 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
 
     @Override
     public void mousePressed(MouseEvent e) {
+        if (!this.pressed){
+            this.pressed_position[0] = this.pos[0];
+            this.pressed_position[1] = this.pos[1];
+        }
         this.pressed = true;
 
         switch (e.getButton()) {
@@ -64,6 +72,7 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        this.released_position = this.pos;
         this.pressed = false;
 
         switch (e.getButton()) {

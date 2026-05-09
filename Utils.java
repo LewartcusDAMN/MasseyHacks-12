@@ -69,16 +69,6 @@ public class Utils {
         return walkFrames;
     }
 
-    public static Tile tile_at(int x, int y){
-        for (Tile[] row : GamePanel.current_moon.tilemap){
-            for (Tile col : row){
-                if (col.pos[0] < x && col.pos[0] + Tile.size > x && col.pos[1] < y && col.pos[1] + Tile.size > y ){
-                    return col;
-                }
-            }
-        }
-        return null;
-    }
 
     public static void playMusic(int gamestate){// method takes the gamestate to play the appropriate background music
         String newMusic = "";

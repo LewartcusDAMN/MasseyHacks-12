@@ -8,12 +8,14 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.Random;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable{
     // Constants
-    public static int SCREEN_WIDTH = 1200, SCREEN_HEIGHT = 1000;
+    public static int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 300;
 
     // Class objects
     private Thread thread;
@@ -21,10 +23,10 @@ public class GamePanel extends JPanel implements Runnable{
 
     public static MouseHandler mouse = new MouseHandler();
     public static KeyHandler key = new KeyHandler();
-    private Menu menu;
-    public static Player player;
-    public static Moon current_moon;
-    
+    public static Camera1 cam;
+
+    //public static ArrayList<String> functions;
+    Function funco;
 
     // Regular fields
     public int gamestate;
@@ -33,22 +35,26 @@ public class GamePanel extends JPanel implements Runnable{
 
     public GamePanel() {// Constructor
         this.thread = new Thread();
-        this.menu = new Menu();
         rand = new Random();
 
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
-        this.setBackground(Color.DARK_GRAY);
+        this.setBackground(Color.WHITE);
         this.addMouseListener(mouse);
         this.addMouseWheelListener(mouse);
         this.addKeyListener(key);
         this.setFocusable(true);
 
-        player = new Player(250, 100);
+        cam = new Camera1(0, 0);
         this.gamestate = 0;
-        offset = new int[]{player.pos[0] - SCREEN_WIDTH/2, player.pos[1] - SCREEN_HEIGHT/2};
+        offset = new int[]{cam.pos[0] - SCREEN_WIDTH/2, cam.pos[1] - SCREEN_HEIGHT/2};
 
-        current_moon = new Moon("Experimentaion", 1);
+        //functions = new ArrayList<>();
 
+
+        String input = JOptionPane.showInputDialog("Enter your name:");
+        System.out.println("User entered: " + input);
+        //functions.add(input);
+        funco = new Function(input);
     }
 
     public void startGameThread(){// Starts the game loop
@@ -84,10 +90,10 @@ public class GamePanel extends JPanel implements Runnable{
 
         switch (gamestate){
             case 0 -> {
-                //Player
-                player.update();
-                if (Utils.tile_at(mouse.pos[0] - offset[0], mouse.pos[1] - offset[1]) != null){
-                    System.out.printf("%d, %d \n", Utils.tile_at(mouse.pos[0] - offset[0], mouse.pos[1] - offset[1]).pos[0], Utils.tile_at(mouse.pos[0] - offset[0], mouse.pos[1] - offset[1]).pos[1]);
+                if (mouse.pressed){
+                    int delta_x = mouse.pos[0] - mouse.pressed_position[0];
+                    int delta_y = mouse.pos[1] - mouse.pressed_position[1];// problem here
+
                 }
             }
         }
@@ -95,7 +101,7 @@ public class GamePanel extends JPanel implements Runnable{
         key.previous = key.keys.clone();
         SCREEN_WIDTH = (int) this.getWidth();
         SCREEN_HEIGHT = (int) this.getHeight();
-        offset = new int[]{player.pos[0] - SCREEN_WIDTH/2, player.pos[1] - SCREEN_HEIGHT/2};
+        offset = new int[]{cam.pos[0] - SCREEN_WIDTH/2, cam.pos[1] - SCREEN_HEIGHT/2};
     }
 
     @Override
@@ -106,21 +112,24 @@ public class GamePanel extends JPanel implements Runnable{
         switch (gamestate) {
             case 0 -> {// 
 
-                g2D.setColor(Color.gray);
-                for (Tile[] row : current_moon.tilemap){
-                    for (Tile col : row){
-                        g2D.setColor(Color.gray);
-                        g2D.fillRect(col.pos[0] - GamePanel.offset[0], col.pos[1] - GamePanel.offset[1], col.size, col.size);
-                        g2D.setColor(Color.BLACK);
-                        g2D.drawRect(col.pos[0] - GamePanel.offset[0], col.pos[1] - GamePanel.offset[1], col.size, col.size);
-                    }
-                }
-
-                player.draw(g2D);
+                g2D.setColor(Color.red);
+                sketcher(funco, g2D);
             }
         }
         
         g2D.drawImage(Utils.crosshair, mouse.pos[0] - 25, mouse.pos[1] - 25, null);
         g2D.dispose();
+    }
+
+    public void sketcher(Function func, Graphics2D g2D){
+        int coeff = Integer.parseInt(func.coeff);
+        int exponent = 2;
+        if (func.exponent != ""){
+            exponent = Integer.parseInt(func.exponent);
+        }
+        for (int x = 0; x < 100; x ++){
+            g2D.fillOval(x, -1*coeff*(int)Math.pow(x, exponent) + SCREEN_HEIGHT, 5, 5);
+            System.out.println("("+x + ", " + coeff*(int)Math.pow(x, exponent)+")");
+        }
     }
 }
