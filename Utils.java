@@ -13,6 +13,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -123,5 +124,54 @@ public class Utils {
         double x_comp = vector[0]*Math.cos(vector[1]);// x component of the vector is the mag times the cos of theta
         double y_comp = vector[0]*Math.sin(vector[1]);// y component of the vector is the mag times the sin of theta
         return new int[]{(int)x_comp, (int)y_comp};
+    }
+
+    public static ArrayList<String> term_splitter(String func){
+        ArrayList<String> terms = new ArrayList<>();
+        int c = 0;
+        boolean bracket = false;
+        for (int i = 0; i < func.length(); i ++){
+            if (func.charAt(i) == 41){// close bracket
+                bracket = false;
+            }
+            if (bracket){
+                continue;
+            }
+            if (func.charAt(i) == 40){// open bracket
+                bracket = true;
+                continue;
+            }// reach open bracket, skip until close bracket
+            
+            if (func.charAt(i) == 43 || func.charAt(i) == 45){// + or -
+                if (i>=1){
+                    if (func.charAt(i-1) == 41){
+                        if (func.charAt(c) != 40){// any coeff
+                            terms.add(new String(func.substring(c, i)));
+                        } else {
+                            terms.add(new String(func.substring(c+1, i-1)));
+                        }
+                    } else {
+                        terms.add(new String(func.substring(c, i)));
+                    }
+                }
+
+                if (func.charAt(i) == 45){
+                    c = i;
+                } else {
+                    c = i + 1;
+                }
+            }
+        }
+
+        if (func.charAt(func.length()-1) == 41){
+            if (func.charAt(c) != 40){// any coeff
+                terms.add(new String(func.substring(c, func.length())));
+            } else {
+                terms.add(new String(func.substring(c+1, func.length()-1)));
+            }
+        } else {
+            terms.add(new String(func.substring(c, func.length())));
+        }
+        return terms;
     }
 }

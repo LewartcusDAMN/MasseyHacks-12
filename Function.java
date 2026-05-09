@@ -10,18 +10,22 @@ public class Function {
         base = "";
         exponent = "";
         coeff = "";
-        for (int i = 0; i < func.length(); i ++){
-            
-        }
-        for (int i = 0; i < func.length(); i ++){
-            char c = func.charAt(i);
-            if (c > 47 && c < 58){
-                coeff = coeff + c;
-            }
-            System.out.println(c);
-        }
+        terms = Utils.term_splitter(func);
+        
+
+
+        
+        System.out.println(terms);
+        // for (int i = 0; i < func.length(); i ++){
+        //     char c = func.charAt(i);
+        //     if (c > 47 && c < 58){
+        //         coeff = coeff + c;
+        //     }
+        //     System.out.println(c);
+        // }
         System.out.println(coeff);
     }
+
 
 
 }

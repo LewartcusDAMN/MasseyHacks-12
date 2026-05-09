@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -51,7 +50,7 @@ public class GamePanel extends JPanel implements Runnable{
         //functions = new ArrayList<>();
 
 
-        String input = JOptionPane.showInputDialog("Enter your name:");
+        String input = JOptionPane.showInputDialog("Enter your Function:");
         System.out.println("User entered: " + input);
         //functions.add(input);
         funco = new Function(input);
@@ -113,7 +112,7 @@ public class GamePanel extends JPanel implements Runnable{
             case 0 -> {// 
 
                 g2D.setColor(Color.red);
-                sketcher(funco, g2D);
+                //sketcher(funco, g2D);
             }
         }
         
@@ -121,15 +120,15 @@ public class GamePanel extends JPanel implements Runnable{
         g2D.dispose();
     }
 
-    public void sketcher(Function func, Graphics2D g2D){
-        int coeff = Integer.parseInt(func.coeff);
-        int exponent = 2;
-        if (func.exponent != ""){
-            exponent = Integer.parseInt(func.exponent);
-        }
-        for (int x = 0; x < 100; x ++){
-            g2D.fillOval(x, -1*coeff*(int)Math.pow(x, exponent) + SCREEN_HEIGHT, 5, 5);
-            System.out.println("("+x + ", " + coeff*(int)Math.pow(x, exponent)+")");
-        }
-    }
+    // public void sketcher(Function func, Graphics2D g2D){
+    //     int coeff = Integer.parseInt(func.coeff);
+    //     int exponent = 2;
+    //     if (func.exponent != ""){
+    //         exponent = Integer.parseInt(func.exponent);
+    //     }
+    //     for (int x = 0; x < 100; x ++){
+    //         g2D.fillOval(x, -1*coeff*(int)Math.pow(x, exponent) + SCREEN_HEIGHT, 5, 5);
+    //         System.out.println("("+x + ", " + coeff*(int)Math.pow(x, exponent)+")");
+    //     }
+    // }
 }
