@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable{
     // Constants
-    public static final int SCREEN_WIDTH = 1200, SCREEN_HEIGHT = 1000;
+    public static int SCREEN_WIDTH = 1200, SCREEN_HEIGHT = 1000;
 
     // Class objects
     private Thread thread;
@@ -93,6 +93,8 @@ public class GamePanel extends JPanel implements Runnable{
         }
         mouse.previous = mouse.pressed;
         key.previous = key.keys.clone();
+        SCREEN_WIDTH = (int) this.getWidth();
+        SCREEN_HEIGHT = (int) this.getHeight();
         offset = new int[]{player.pos[0] - SCREEN_WIDTH/2, player.pos[1] - SCREEN_HEIGHT/2};
     }
 

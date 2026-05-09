@@ -23,6 +23,6 @@ public class GameFrame extends JFrame{
         this.setDefaultCloseOperation(3);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
-        this.setResizable(false);
+        this.setResizable(true);
     }
 }
