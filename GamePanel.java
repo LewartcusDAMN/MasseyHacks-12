@@ -94,6 +94,7 @@ public class GamePanel extends JPanel implements Runnable{
                     int delta_y = mouse.pos[1] - mouse.pressed_position[1];// problem here
 
                 }
+                //System.out.println(funco);
             }
         }
         mouse.previous = mouse.pressed;
@@ -116,7 +117,6 @@ public class GamePanel extends JPanel implements Runnable{
             }
         }
         
-        g2D.drawImage(Utils.crosshair, mouse.pos[0] - 25, mouse.pos[1] - 25, null);
         g2D.dispose();
     }
 
