@@ -39,6 +39,7 @@ public class GamePanel extends JPanel implements Runnable{
     private int[] lastMousePos;
     public double functionXScale;
     public double functionYScale;
+    private double[] selectedFunctionCoord = null;
 
     public GamePanel() {// Constructor
         this.thread = new Thread();
@@ -77,6 +78,42 @@ public class GamePanel extends JPanel implements Runnable{
     public void setGridScale(int scale) {
         this.gridScale = scale;
         this.repaint();
+    }
+    private void checkFunctionClickNearby(int screenX, int screenY) {
+        double closestDist = Double.MAX_VALUE;
+        double closestX = 0;
+        double closestY = 0;
+        final int threshold = 25;
+        double scale = gridScale / 100.0;
+
+        // Calculate visible range based on camera and zoom
+        double visibleLeft = cam.pos[0] - SCREEN_WIDTH / (2.0 * zoom);
+        double visibleRight = cam.pos[0] + SCREEN_WIDTH / (2.0 * zoom);
+        int startX = Math.max(-1000, (int) (visibleLeft / scale - 10));
+        int endX = Math.min(1000, (int) (visibleRight / scale + 10));
+
+        for (int x = startX; x <= endX; x += 1) {
+            double worldY = funco.output(x) * scale;
+            double worldX = x * scale;
+            
+            // Transform world coordinates to screen coordinates with proper y-inversion
+            int screenPointX = (int) Math.round((worldX - cam.pos[0]) * zoom + SCREEN_WIDTH / 2.0);
+            int screenPointY = (int) Math.round(((-worldY - cam.pos[1]) * zoom + SCREEN_HEIGHT / 2.0));
+
+            int distX = screenPointX - screenX;
+            int distY = screenPointY - screenY;
+            double dist = Math.sqrt(distX * distX + distY * distY);
+
+            if (dist < threshold && dist < closestDist) {
+                closestDist = dist;
+                closestX = x;
+                closestY = funco.output(x);
+            }
+        }
+
+        if (closestDist < threshold) {
+            selectedFunctionCoord = new double[]{closestX, closestY};
+        }
     }
     public void startGameThread(){
         if (this.thread == null || !this.thread.isAlive()) {
@@ -121,7 +158,12 @@ public class GamePanel extends JPanel implements Runnable{
 
         switch (gamestate){
             case 0 -> {
-                if (mouse.pressed && mouse.left_click) {
+                if (mouse.pressed && !mouse.previous && !mouse.left_click) {
+                    selectedFunctionCoord = null;
+                }
+                if (mouse.pressed && !mouse.previous && mouse.left_click) {
+                    checkFunctionClickNearby(mouse.pos[0], mouse.pos[1]);
+                } else if (mouse.pressed && mouse.left_click && selectedFunctionCoord == null) {
                     int delta_x = mouse.pos[0] - lastMousePos[0];
                     int delta_y = mouse.pos[1] - lastMousePos[1];
                     if (delta_x != 0 || delta_y != 0) {
@@ -159,6 +201,12 @@ public class GamePanel extends JPanel implements Runnable{
         }
         mouse.previous = mouse.pressed;
         key.previous = key.keys.clone();
+        
+        // Clear selected coordinate when mouse is released
+        if (!mouse.pressed && selectedFunctionCoord != null) {
+            selectedFunctionCoord = null;
+        }
+        
         offset = new int[]{cam.pos[0] - SCREEN_WIDTH/2, cam.pos[1] - SCREEN_HEIGHT/2};
     }
 
@@ -186,6 +234,14 @@ public class GamePanel extends JPanel implements Runnable{
                 g2D.drawLine(0, -gridRange, 0, gridRange);
                 g2D.setColor(Color.RED);
                 g2D.fillOval(-5, -5, 10, 10);
+
+                if (selectedFunctionCoord != null) {
+                    int textX = (int) (selectedFunctionCoord[0] * functionXScale) + 10;
+                    int textY = (int) (-selectedFunctionCoord[1] * functionYScale) - 10;
+                    g2D.setColor(Color.BLACK);
+                    g2D.drawString(String.format("(%.2f, %.2f)", selectedFunctionCoord[0], selectedFunctionCoord[1]), textX, textY);
+                    g2D.fillOval((int) (selectedFunctionCoord[0] - 5), (int) (-selectedFunctionCoord[1] - 5), 10, 10);
+                }
 
                 // Graph the function
                 g2D.setColor(Color.BLUE);
