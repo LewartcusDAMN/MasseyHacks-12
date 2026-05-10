@@ -46,6 +46,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.WHITE);
+        this.addMouseListener(mouse);
         this.addMouseWheelListener(mouse);
         this.addKeyListener(key);
         this.setFocusable(true);
@@ -123,10 +124,9 @@ public class GamePanel extends JPanel implements Runnable{
                 if (mouse.pressed && mouse.left_click) {
                     int delta_x = mouse.pos[0] - lastMousePos[0];
                     int delta_y = mouse.pos[1] - lastMousePos[1];
-                    double factor = gridScale / 100.0;
                     if (delta_x != 0 || delta_y != 0) {
-                        cam.pos[0] -= (int) Math.round(delta_x / zoom * factor);
-                        cam.pos[1] -= (int) Math.round(delta_y / zoom * factor);
+                        cam.pos[0] -= (int) Math.round(delta_x / zoom);
+                        cam.pos[1] -= (int) Math.round(delta_y / zoom);
                         lastMousePos[0] = mouse.pos[0];
                         lastMousePos[1] = mouse.pos[1];
                     }
@@ -192,7 +192,7 @@ public class GamePanel extends JPanel implements Runnable{
                 int prevX = -1000;
                 double prevScaledX = prevX * (gridScale / 100.0);
                 double prevY = funco.output(prevX) * (gridScale / 100.0);
-                for (int x = -1000; x <= 1000; x += 1) {
+                for (double x = -1000; x <= 1000; x += 1/(gridScale/100.0)) {
                     double scaledX = x * (gridScale / 100.0);
                     double y = funco.output(x) * (gridScale / 100.0);
                     g2D.drawLine((int) Math.round(prevScaledX), (int) -Math.round(prevY), (int) Math.round(scaledX), -(int) Math.round(y));

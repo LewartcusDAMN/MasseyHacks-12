@@ -16,7 +16,6 @@ public class Function {
         }
 
         this.terms = Utils.term_splitter(this.expression);
-        System.out.println(this.terms);
         this.root = Parser.parse(this.expression);
     }
 

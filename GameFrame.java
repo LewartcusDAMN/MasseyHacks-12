@@ -24,7 +24,7 @@ public class GameFrame extends JFrame{
         this.setLayout(new BorderLayout());
         this.add(panel, BorderLayout.CENTER);
 
-        JSlider gridScaleSlider = new JSlider(1, 5000, 1000);
+        JSlider gridScaleSlider = new JSlider(1, 5000, 100);
         gridScaleSlider.setMajorTickSpacing(500);
         gridScaleSlider.setPaintTicks(true);
         gridScaleSlider.setPaintLabels(true);
