@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable{
     // Constants
-    public static int SCREEN_WIDTH = 1200, SCREEN_HEIGHT = 800;
+    public static int SCREEN_WIDTH = 700, SCREEN_HEIGHT = 500;
 
     // Class objects
     private Thread thread;
@@ -77,6 +77,8 @@ public class GamePanel extends JPanel implements Runnable{
     }
     public void setGridScale(int scale) {
         this.gridScale = scale;
+        this.functionXScale = this.gridScale / 100.0;
+        this.functionYScale = this.gridScale / 100.0;
         this.repaint();
     }
     private void checkFunctionClickNearby(int screenX, int screenY) {
@@ -89,10 +91,10 @@ public class GamePanel extends JPanel implements Runnable{
         // Calculate visible range based on camera and zoom
         double visibleLeft = cam.pos[0] - SCREEN_WIDTH / (2.0 * zoom);
         double visibleRight = cam.pos[0] + SCREEN_WIDTH / (2.0 * zoom);
-        int startX = Math.max(-1000, (int) (visibleLeft / scale - 10));
-        int endX = Math.min(1000, (int) (visibleRight / scale + 10));
+        double startX = Math.max(-1000.0, visibleLeft / scale - 10);
+        double endX = Math.min(1000.0, visibleRight / scale + 10);
 
-        for (int x = startX; x <= endX; x += 1) {
+        for (double x = startX; x <= endX; x += 0.01) {
             double worldY = funco.output(x) * scale;
             double worldX = x * scale;
             
@@ -244,7 +246,7 @@ public class GamePanel extends JPanel implements Runnable{
                     int textY = (int) (-selectedFunctionCoord[1] * functionYScale) - 10;
                     g2D.setColor(Color.BLACK);
                     g2D.drawString(String.format("(%.2f, %.2f)", selectedFunctionCoord[0], selectedFunctionCoord[1]), textX, textY);
-                    g2D.fillOval((int) (selectedFunctionCoord[0] - 5), (int) (-selectedFunctionCoord[1] - 5), 10, 10);
+                    g2D.fillOval((int) (selectedFunctionCoord[0] * functionXScale - 5), (int) (-selectedFunctionCoord[1] * functionYScale - 5), 10, 10);
                 }
 
                 // Graph the function

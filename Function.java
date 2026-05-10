@@ -182,13 +182,6 @@ public class Function {
             Node base = parseBase();
             if (match('^')) {
                 Node exponent = parseFactor();
-                if (!(exponent instanceof ConstNode)) {
-                    throw new IllegalArgumentException("Exponent must be a constant");
-                }
-                double expValue = ((ConstNode) exponent).value;
-                if (expValue != Math.floor(expValue)) {
-                    throw new IllegalArgumentException("Exponent must be an integer");
-                }
                 return new BinaryOpNode('^', base, exponent);
             }
             return base;
