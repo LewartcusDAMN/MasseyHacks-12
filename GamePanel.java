@@ -31,6 +31,10 @@ public class GamePanel extends JPanel implements Runnable{
     public int gamestate;
     private final int FPS = 60;
     public static int[] offset;
+    public double zoom;
+    private final double minZoom;
+    private final double maxZoom;
+    private final double zoomStep;
 
     public GamePanel() {// Constructor
         this.thread = new Thread();
@@ -42,6 +46,11 @@ public class GamePanel extends JPanel implements Runnable{
         this.addMouseWheelListener(mouse);
         this.addKeyListener(key);
         this.setFocusable(true);
+
+        this.zoom = 1.0;
+        this.minZoom = 0.25;
+        this.maxZoom = 4.0;
+        this.zoomStep = 1.1;
 
         cam = new Camera1(0, 0);
         this.gamestate = 0;
@@ -87,32 +96,75 @@ public class GamePanel extends JPanel implements Runnable{
         } catch (Exception e) {// incase mouse leaves the screen
         }
 
+        SCREEN_WIDTH = (int) this.getWidth();
+        SCREEN_HEIGHT = (int) this.getHeight();
+
         switch (gamestate){
             case 0 -> {
-                if (mouse.pressed){
+                if (mouse.pressed && mouse.left_click) {
                     int delta_x = mouse.pos[0] - mouse.pressed_position[0];
-                    int delta_y = mouse.pos[1] - mouse.pressed_position[1];// problem here
-
+                    int delta_y = mouse.pos[1] - mouse.pressed_position[1];
+                    if (delta_x != 0 || delta_y != 0) {
+                        cam.pos[0] -= (int) Math.round(delta_x / zoom);
+                        cam.pos[1] -= (int) Math.round(delta_y / zoom);
+                        mouse.pressed_position[0] = mouse.pos[0];
+                        mouse.pressed_position[1] = mouse.pos[1];
+                    }
                 }
-                //System.out.println(funco);
+                if (mouse.wheelMoved) {
+                    int mx = mouse.wheelX;
+                    int my = mouse.wheelY;
+                    double worldX = (mx - SCREEN_WIDTH / 2.0) / zoom + cam.pos[0];
+                    double worldY = (my - SCREEN_HEIGHT / 2.0) / zoom + cam.pos[1];
+
+                    double newZoom = zoom;
+                    if (mouse.scroll_direction == mouse.UP) {
+                        newZoom *= zoomStep;
+                    } else if (mouse.scroll_direction == mouse.DOWN) {
+                        newZoom /= zoomStep;
+                    }
+                    newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+
+                    if (newZoom != zoom) {
+                        zoom = newZoom;
+                        cam.pos[0] = (int) Math.round(worldX - (mx - SCREEN_WIDTH / 2.0) / zoom);
+                        cam.pos[1] = (int) Math.round(worldY - (my - SCREEN_HEIGHT / 2.0) / zoom);
+                    }
+
+                    mouse.wheelMoved = false;
+                    mouse.scroll_direction = 0;
+                    mouse.scroll_amount = 0;
+                }
             }
         }
         mouse.previous = mouse.pressed;
         key.previous = key.keys.clone();
-        SCREEN_WIDTH = (int) this.getWidth();
-        SCREEN_HEIGHT = (int) this.getHeight();
         offset = new int[]{cam.pos[0] - SCREEN_WIDTH/2, cam.pos[1] - SCREEN_HEIGHT/2};
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2D = (Graphics2D)g;
+        Graphics2D g2D = (Graphics2D) g.create();
+
+        g2D.translate(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0);
+        g2D.scale(zoom, zoom);
+        g2D.translate(-cam.pos[0], -cam.pos[1]);
 
         switch (gamestate) {
-            case 0 -> {// 
-
-                g2D.setColor(Color.red);
+            case 0 -> {
+                g2D.setColor(Color.LIGHT_GRAY);
+                for (int x = -1000; x <= 1000; x += 100) {
+                    g2D.drawLine(x, -1000, x, 1000);
+                }
+                for (int y = -1000; y <= 1000; y += 100) {
+                    g2D.drawLine(-1000, y, 1000, y);
+                }
+                g2D.setColor(Color.GRAY);
+                g2D.drawLine(-1000, 0, 1000, 0);
+                g2D.drawLine(0, -1000, 0, 1000);
+                g2D.setColor(Color.RED);
+                g2D.fillOval(-5, -5, 10, 10);
                 //sketcher(funco, g2D);
             }
         }

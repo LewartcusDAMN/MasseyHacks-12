@@ -17,6 +17,9 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
     public int[] pressed_position;
     public int[] released_position;
 
+    public boolean wheelMoved;
+    public int wheelX;
+    public int wheelY;
     public int scroll_direction; // -1 for up, 1 for down
     public final int UP = -1, DOWN = 1;
     public int scroll_amount;  
@@ -29,6 +32,9 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
         this.left_click = false;
         this.right_click = false;
         this.scroll = false;
+        this.wheelMoved = false;
+        this.wheelX = 0;
+        this.wheelY = 0;
 
         this.scroll_direction = 0; // neutral at start
         this.scroll_amount = 0;
@@ -37,9 +43,11 @@ public class MouseHandler implements MouseListener, MouseWheelListener{
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        scroll = true;
+        wheelMoved = true;
+        wheelX = e.getX();
+        wheelY = e.getY();
         scroll_direction = Integer.signum(e.getWheelRotation()); // -1 (up) or 1 (down)
-        scroll_amount = e.getScrollAmount() * e.getWheelRotation();// getting the amount of scroll 
+        scroll_amount = e.getScrollAmount() * e.getWheelRotation(); // getting the amount of scroll
     }
 
     public void update(){
