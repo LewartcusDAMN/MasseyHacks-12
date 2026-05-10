@@ -4,12 +4,9 @@
  * Jframe for the panel
  */
 
+import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -20,15 +17,15 @@ public class GameFrame extends JFrame{
     public static Thread thread;
 
     public GameFrame(){
-        super("Graphing Calculator");
+        super("walmar desmos");
         thread = new Thread();
         panel = new GamePanel();
 
         this.setLayout(new BorderLayout());
         this.add(panel, BorderLayout.CENTER);
 
-        JSlider gridScaleSlider = new JSlider(1, 1000, 100);
-        gridScaleSlider.setMajorTickSpacing(100);
+        JSlider gridScaleSlider = new JSlider(1, 5000, 1000);
+        gridScaleSlider.setMajorTickSpacing(500);
         gridScaleSlider.setPaintTicks(true);
         gridScaleSlider.setPaintLabels(true);
         gridScaleSlider.addChangeListener(new ChangeListener() {

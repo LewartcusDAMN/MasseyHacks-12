@@ -51,7 +51,7 @@ public class GamePanel extends JPanel implements Runnable{
         this.setFocusable(true);
 
         this.zoom = 1.0;
-        this.minZoom = 0.25;
+        this.minZoom = 1e-9;
         this.maxZoom = Double.MAX_VALUE;
         this.zoomStep = 1.1;
         this.gridScale = 100;
@@ -192,7 +192,7 @@ public class GamePanel extends JPanel implements Runnable{
                 int prevX = -1000;
                 double prevScaledX = prevX * (gridScale / 100.0);
                 double prevY = funco.output(prevX) * (gridScale / 100.0);
-                for (int x = -1000 + 10; x <= 1000; x += 10) {
+                for (int x = -1000; x <= 1000; x += 1) {
                     double scaledX = x * (gridScale / 100.0);
                     double y = funco.output(x) * (gridScale / 100.0);
                     g2D.drawLine((int) Math.round(prevScaledX), (int) -Math.round(prevY), (int) Math.round(scaledX), -(int) Math.round(y));
