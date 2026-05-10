@@ -152,6 +152,10 @@ public class GamePanel extends JPanel implements Runnable{
             lastMousePos[0] = mouse.pos[0];
             lastMousePos[1] = mouse.pos[1];
         }
+        if (mouse.pressed){
+            checkFunctionClickNearby(mouse.pos[0], mouse.pos[1]);
+            
+        }
 
         SCREEN_WIDTH = (int) this.getWidth();
         SCREEN_HEIGHT = (int) this.getHeight();
