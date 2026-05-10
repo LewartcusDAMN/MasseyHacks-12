@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable{
     // Constants
-    public static int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 300;
+    public static int SCREEN_WIDTH = 1200, SCREEN_HEIGHT = 800;
 
     // Class objects
     private Thread thread;
@@ -35,6 +35,10 @@ public class GamePanel extends JPanel implements Runnable{
     private final double minZoom;
     private final double maxZoom;
     private final double zoomStep;
+    public int gridScale;
+    private int[] lastMousePos;
+    public double functionXScale;
+    public double functionYScale;
 
     public GamePanel() {// Constructor
         this.thread = new Thread();
@@ -42,15 +46,19 @@ public class GamePanel extends JPanel implements Runnable{
 
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.WHITE);
-        this.addMouseListener(mouse);
         this.addMouseWheelListener(mouse);
         this.addKeyListener(key);
         this.setFocusable(true);
 
         this.zoom = 1.0;
         this.minZoom = 0.25;
-        this.maxZoom = 4.0;
+        this.maxZoom = Double.MAX_VALUE;
         this.zoomStep = 1.1;
+        this.gridScale = 100;
+        this.lastMousePos = new int[]{0, 0};
+        this.functionXScale = this.gridScale / 100.0;
+        this.functionYScale = this.gridScale / 100.0;
+        this.lastMousePos = new int[]{0, 0};
 
         cam = new Camera1(0, 0);
         this.gamestate = 0;
@@ -63,11 +71,17 @@ public class GamePanel extends JPanel implements Runnable{
         System.out.println("User entered: " + input);
         //functions.add(input);
         funco = new Function(input);
+        System.out.println("Function: " + funco);
     }
-
-    public void startGameThread(){// Starts the game loop
-        this.thread = new Thread(this);
-        this.thread.start();
+    public void setGridScale(int scale) {
+        this.gridScale = scale;
+        this.repaint();
+    }
+    public void startGameThread(){
+        if (this.thread == null || !this.thread.isAlive()) {
+            this.thread = new Thread(this);
+            this.thread.start();
+        }
     }
     @Override
     public void run() {//1 second in nano secs per frame
@@ -96,19 +110,25 @@ public class GamePanel extends JPanel implements Runnable{
         } catch (Exception e) {// incase mouse leaves the screen
         }
 
+        if (mouse.pressed && !mouse.previous) {
+            lastMousePos[0] = mouse.pos[0];
+            lastMousePos[1] = mouse.pos[1];
+        }
+
         SCREEN_WIDTH = (int) this.getWidth();
         SCREEN_HEIGHT = (int) this.getHeight();
 
         switch (gamestate){
             case 0 -> {
                 if (mouse.pressed && mouse.left_click) {
-                    int delta_x = mouse.pos[0] - mouse.pressed_position[0];
-                    int delta_y = mouse.pos[1] - mouse.pressed_position[1];
+                    int delta_x = mouse.pos[0] - lastMousePos[0];
+                    int delta_y = mouse.pos[1] - lastMousePos[1];
+                    double factor = gridScale / 100.0;
                     if (delta_x != 0 || delta_y != 0) {
-                        cam.pos[0] -= (int) Math.round(delta_x / zoom);
-                        cam.pos[1] -= (int) Math.round(delta_y / zoom);
-                        mouse.pressed_position[0] = mouse.pos[0];
-                        mouse.pressed_position[1] = mouse.pos[1];
+                        cam.pos[0] -= (int) Math.round(delta_x / zoom * factor);
+                        cam.pos[1] -= (int) Math.round(delta_y / zoom * factor);
+                        lastMousePos[0] = mouse.pos[0];
+                        lastMousePos[1] = mouse.pos[1];
                     }
                 }
                 if (mouse.wheelMoved) {
@@ -153,34 +173,35 @@ public class GamePanel extends JPanel implements Runnable{
 
         switch (gamestate) {
             case 0 -> {
+                int gridRange = (int) (1000 * (gridScale / 100.0));
                 g2D.setColor(Color.LIGHT_GRAY);
-                for (int x = -1000; x <= 1000; x += 100) {
-                    g2D.drawLine(x, -1000, x, 1000);
+                for (int x = -gridRange; x <= gridRange; x += gridScale) {
+                    g2D.drawLine(x, -gridRange, x, gridRange);
                 }
-                for (int y = -1000; y <= 1000; y += 100) {
-                    g2D.drawLine(-1000, y, 1000, y);
+                for (int y = -gridRange; y <= gridRange; y += gridScale) {
+                    g2D.drawLine(-gridRange, y, gridRange, y);
                 }
                 g2D.setColor(Color.GRAY);
-                g2D.drawLine(-1000, 0, 1000, 0);
-                g2D.drawLine(0, -1000, 0, 1000);
+                g2D.drawLine(-gridRange, 0, gridRange, 0);
+                g2D.drawLine(0, -gridRange, 0, gridRange);
                 g2D.setColor(Color.RED);
                 g2D.fillOval(-5, -5, 10, 10);
-                //sketcher(funco, g2D);
+
+                // Graph the function
+                g2D.setColor(Color.BLUE);
+                int prevX = -1000;
+                double prevScaledX = prevX * (gridScale / 100.0);
+                double prevY = funco.output(prevX) * (gridScale / 100.0);
+                for (int x = -1000 + 10; x <= 1000; x += 10) {
+                    double scaledX = x * (gridScale / 100.0);
+                    double y = funco.output(x) * (gridScale / 100.0);
+                    g2D.drawLine((int) Math.round(prevScaledX), (int) -Math.round(prevY), (int) Math.round(scaledX), -(int) Math.round(y));
+                    prevScaledX = scaledX;
+                    prevY = y;
+                }
             }
         }
         
         g2D.dispose();
     }
-
-    // public void sketcher(Function func, Graphics2D g2D){
-    //     int coeff = Integer.parseInt(func.coeff);
-    //     int exponent = 2;
-    //     if (func.exponent != ""){
-    //         exponent = Integer.parseInt(func.exponent);
-    //     }
-    //     for (int x = 0; x < 100; x ++){
-    //         g2D.fillOval(x, -1*coeff*(int)Math.pow(x, exponent) + SCREEN_HEIGHT, 5, 5);
-    //         System.out.println("("+x + ", " + coeff*(int)Math.pow(x, exponent)+")");
-    //     }
-    // }
 }

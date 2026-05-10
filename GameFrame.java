@@ -5,6 +5,13 @@
  */
 
 import javax.swing.JFrame;
+import javax.swing.JSlider;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class GameFrame extends JFrame{
 
@@ -17,7 +24,21 @@ public class GameFrame extends JFrame{
         thread = new Thread();
         panel = new GamePanel();
 
-        this.add(panel);
+        this.setLayout(new BorderLayout());
+        this.add(panel, BorderLayout.CENTER);
+
+        JSlider gridScaleSlider = new JSlider(1, 1000, 100);
+        gridScaleSlider.setMajorTickSpacing(100);
+        gridScaleSlider.setPaintTicks(true);
+        gridScaleSlider.setPaintLabels(true);
+        gridScaleSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                panel.setGridScale(gridScaleSlider.getValue());
+            }
+        });
+        this.add(gridScaleSlider, BorderLayout.SOUTH);
+
         this.pack();
 
         this.setDefaultCloseOperation(3);

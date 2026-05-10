@@ -70,52 +70,27 @@ public class Utils {
         return font;
     }
 
-    public static ArrayList<String> term_splitter(String func){
+    public static ArrayList<String> term_splitter(String func) {
+        String expression = func.replaceAll("\\s+", "");
         ArrayList<String> terms = new ArrayList<>();
-        int c = 0;
-        boolean bracket = false;
-        for (int i = 0; i < func.length(); i ++){
-            if (func.charAt(i) == 41){// close bracket
-                bracket = false;
-            }
-            if (bracket){
-                continue;
-            }
-            if (func.charAt(i) == 40){// open bracket
-                bracket = true;
-                continue;
-            }// reach open bracket, skip until close bracket
-            
-            if (func.charAt(i) == 43 || func.charAt(i) == 45){// + or -
-                if (i>=1){
-                    if (func.charAt(i-1) == 41){
-                        if (func.charAt(c) != 40){// any coeff
-                            terms.add(new String(func.substring(c, i)));
-                        } else {
-                            terms.add(new String(func.substring(c+1, i-1)));
-                        }
-                    } else {
-                        terms.add(new String(func.substring(c, i)));
-                    }
-                }
-
-                if (func.charAt(i) == 45){
-                    c = i;
-                } else {
-                    c = i + 1;
-                }
-            }
+        if (expression.isEmpty()) {
+            return terms;
         }
 
-        if (func.charAt(func.length()-1) == 41){
-            if (func.charAt(c) != 40){// any coeff
-                terms.add(new String(func.substring(c, func.length())));
-            } else {
-                terms.add(new String(func.substring(c+1, func.length()-1)));
+        int depth = 0;
+        int start = 0;
+        for (int i = 0; i < expression.length(); i++) {
+            char current = expression.charAt(i);
+            if (current == '(') {
+                depth++;
+            } else if (current == ')') {
+                depth--;
+            } else if ((current == '+' || current == '-') && depth == 0 && i > 0) {
+                terms.add(expression.substring(start, i));
+                start = i;
             }
-        } else {
-            terms.add(new String(func.substring(c, func.length())));
         }
+        terms.add(expression.substring(start));
         return terms;
     }
 }
