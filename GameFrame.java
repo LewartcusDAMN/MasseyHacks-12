@@ -17,7 +17,7 @@ public class GameFrame extends JFrame{
     public static Thread thread;
 
     public GameFrame(){
-        super("walmar desmos");
+        super("Somsed (NOT FAKE DESMOS)");
         thread = new Thread();
         panel = new GamePanel();
 

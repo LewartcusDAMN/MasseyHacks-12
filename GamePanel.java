@@ -4,13 +4,16 @@
  * main class for updating and painting the game
  */
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class GamePanel extends JPanel implements Runnable{
     // Constants
@@ -26,6 +29,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     //public static ArrayList<String> functions;
     Function funco;
+    private JTextField functionInput;
 
     // Regular fields
     public int gamestate;
@@ -47,6 +51,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.WHITE);
+        this.setLayout(new BorderLayout());
         this.addMouseListener(mouse);
         this.addMouseWheelListener(mouse);
         this.addKeyListener(key);
@@ -68,13 +73,26 @@ public class GamePanel extends JPanel implements Runnable{
 
         //functions = new ArrayList<>();
 
-
-        String input = JOptionPane.showInputDialog("Enter your Function:");
-        System.out.println("User entered: " + input);
-        //functions.add(input);
-        funco = new Function(input);
-        System.out.println("Function: " + funco);
-    }
+        funco = null;
+        functionInput = new JTextField();
+        functionInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = functionInput.getText().trim();
+                if (input.isEmpty()) {
+                    funco = null;
+                    repaint();
+                    return;
+                }
+                try {
+                    funco = new Function(input);
+                    repaint();
+                } catch (Exception ex) {
+                    System.out.println("Invalid function: " + ex.getMessage());
+                }
+            }
+        });
+        this.add(functionInput, BorderLayout.SOUTH);    }
     public void setGridScale(int scale) {
         this.gridScale = scale;
         this.functionXScale = this.gridScale / 100.0;
@@ -82,6 +100,10 @@ public class GamePanel extends JPanel implements Runnable{
         this.repaint();
     }
     private void checkFunctionClickNearby(int screenX, int screenY) {
+        if (funco == null) {
+            selectedFunctionCoord = null;
+            return;
+        }
         double closestDist = Double.MAX_VALUE;
         double closestX = 0;
         double closestY = 0;
@@ -117,6 +139,21 @@ public class GamePanel extends JPanel implements Runnable{
             selectedFunctionCoord = new double[]{closestX, closestY};
         }
     }
+
+    private boolean isSegmentContinuous(double x0, double y0, double x1, double y1) {
+        if (!Double.isFinite(y0) || !Double.isFinite(y1)) {
+            return false;
+        }
+        double xm = (x0 + x1) / 2.0;
+        double ym = funco.output(xm) * (gridScale / 100.0);
+        if (!Double.isFinite(ym)) {
+            return false;
+        }
+        double interp = (y0 + y1) / 2.0;
+        double maxJump = Math.max(10.0, Math.abs(y1 - y0) * 0.5);
+        return Math.abs(ym - interp) < maxJump;
+    }
+
     public void startGameThread(){
         if (this.thread == null || !this.thread.isAlive()) {
             this.thread = new Thread(this);
@@ -250,16 +287,23 @@ public class GamePanel extends JPanel implements Runnable{
                 }
 
                 // Graph the function
-                g2D.setColor(Color.BLUE);
-                int prevX = -1000;
-                double prevScaledX = prevX * (gridScale / 100.0);
-                double prevY = funco.output(prevX) * (gridScale / 100.0);
-                for (double x = -1000; x <= 1000; x += 1/(gridScale/100.0)) {
-                    double scaledX = x * (gridScale / 100.0);
-                    double y = funco.output(x) * (gridScale / 100.0);
-                    g2D.drawLine((int) Math.round(prevScaledX), (int) -Math.round(prevY), (int) Math.round(scaledX), -(int) Math.round(y));
-                    prevScaledX = scaledX;
-                    prevY = y;
+                if (funco != null) {
+                    g2D.setColor(Color.BLUE);
+                    double prevX = -1000;
+                    double prevScaledX = prevX * (gridScale / 100.0);
+                    double prevY = funco.output(prevX) * (gridScale / 100.0);
+                    for (double x = -1000; x <= 1000; x += 1/(gridScale/100.0)) {
+                        double scaledX = x * (gridScale / 100.0);
+                        double unscaledY = funco.output(x);
+                        double y = unscaledY * (gridScale / 100.0);
+                        // Only draw if both current and previous points are within ±1000
+                        if (Math.abs(unscaledY) <= 1000 && Math.abs(funco.output(prevX)) <= 1000 && isSegmentContinuous(prevX, prevY, x, y)) {
+                            g2D.drawLine((int) Math.round(prevScaledX), (int) -Math.round(prevY), (int) Math.round(scaledX), -(int) Math.round(y));
+                        }
+                        prevX = x;
+                        prevScaledX = scaledX;
+                        prevY = y;
+                    }
                 }
             }
         }
